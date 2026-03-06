@@ -1,0 +1,37 @@
+Server:
+  HttpPort: :8082
+  Mode: release
+
+
+Database:
+  DbType: mysql
+  DbHost: localhost
+  DbPort: 3306
+  DbUser: root
+  DbPassword: 123456
+  DbName: urls
+  MaxIdleConnections: 10
+  MaxOpenConnections: 100
+
+
+Redis:
+  RdbPort: localhost:6379
+  RdbPassword: ""
+  Rdb: 0
+
+
+# 布隆过滤器
+Bloom:
+  P: 0.01
+  N: 1000000
+
+# 雪花算法配置
+Snowflake:
+  MachineID: 1
+  Epoch: 1735660800000
+
+
+Logger:
+  Level: debug
+  LogType : std
+

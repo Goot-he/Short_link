@@ -1,0 +1,76 @@
+definitions:
+  model.CreateUrlRequest:
+    properties:
+      custom_url:
+        type: string
+      expired_at:
+        type: string
+      long_url:
+        type: string
+    type: object
+  model.CreateUrlResponse:
+    properties:
+      expired_at:
+        type: string
+      short_url:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /{code}:
+    get:
+      description: 根据短码重定向到原始长链接
+      parameters:
+      - description: 短码
+        in: path
+        name: code
+        required: true
+        type: string
+      responses:
+        "301":
+          description: Moved Permanently
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 短链重定向
+      tags:
+      - URL
+  /api/v1/url/create:
+    post:
+      consumes:
+      - application/json
+      description: 接收长链接、可选的自定义短码与过期时间，返回短码与过期时间
+      parameters:
+      - description: 请求体
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateUrlRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CreateUrlResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: 创建短链接
+      tags:
+      - URL
+swagger: "2.0"
