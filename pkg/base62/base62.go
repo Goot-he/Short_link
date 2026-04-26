@@ -14,7 +14,7 @@ func NewShortCodeGenerator() *ShortCodeGenerator {
 	return &ShortCodeGenerator{}
 }
 
-// Base62 正确实现：十进制转62进制字符串
+// CreateShortCode Base62 正确实现：十进制转62进制字符串
 func (s *ShortCodeGenerator) CreateShortCode(snowFlakeID int64) string {
 	if snowFlakeID == 0 {
 		return string(characters[0]) // 处理0的特殊情况

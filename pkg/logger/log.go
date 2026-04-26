@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	red    = 31
-	yellow = 33
-	blue   = 35
-	gray   = 37
+	red    = 31 //红色
+	yellow = 33 //黄色
+	blue   = 35 //紫色
+	gray   = 37 //灰白色
 )
 
 type LogFormatter struct{}
@@ -47,7 +47,7 @@ func (t *LogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	for k, v := range entry.Data {
 		fields = append(fields, fmt.Sprintf("[%s = %v]", k, v))
 	}
-	fieldsStr := strings.Join(fields, " ")
+	fieldsStr := strings.Join(fields, " ") //拼接字符串函数 将全部的字符使用" "拼接
 
 	if entry.HasCaller() {
 		// 自定义文件路径
@@ -62,11 +62,15 @@ func (t *LogFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 
 //=======================================================================
 
+// 用一个map管理全部的不同类型的日志
 var adapters = make(map[string]*logrus.Logger)
 
+// 这里就是一个注册处 全部的日志类型都是调用这个函数注册
 func registerAdapter(adapterName string, log *logrus.Logger) {
 	adapters[adapterName] = log
 }
+
+//在使用的时候：log := adapters["adaptersName"] 直接从结构体里面拿log对象
 
 // ParseLogLevel 判断传入的是什么等级
 func ParseLogLevel(s string) (logrus.Level, error) {
@@ -78,7 +82,7 @@ func ParseLogLevel(s string) (logrus.Level, error) {
 		return logrus.TraceLevel, nil
 	case "info":
 		return logrus.InfoLevel, nil
-	case "warming":
+	case "warning":
 		return logrus.WarnLevel, nil
 	case "error":
 		return logrus.ErrorLevel, nil
@@ -90,20 +94,32 @@ func ParseLogLevel(s string) (logrus.Level, error) {
 	}
 }
 
-// DefaultLogger 处理传入的log对象
+// DefaultLogger 统一初始化log配置的函数 处理传入的log对象
 func DefaultLogger(mylog *logrus.Logger, Level string) {
-	mylog.SetReportCaller(true)
-	mylog.SetFormatter(&LogFormatter{})
-	LogLevel, _ := ParseLogLevel(Level)
-	mylog.SetLevel(LogLevel)
+	mylog.SetReportCaller(true)         //让日志能打印出：文件名 + 行号 + 函数名
+	mylog.SetFormatter(&LogFormatter{}) //设置日志格式 就上面自定义的格式
+	LogLevel, _ := ParseLogLevel(Level) //解析日志级别 然后传入下面这个函数
+	mylog.SetLevel(LogLevel)            //设置最低日志打印级别 Trace < Debug < Info < Warn < Error < Fatal < Panic
 }
 
-func InitLogger(Log **logrus.Logger) error {
-	NewLog, ok := adapters[config.GlobalCfg.Logger.LogType]
+func InitLogger() *logrus.Logger {
+	logger, ok := adapters[config.GlobalCfg.Logger.LogType]
 	if !ok {
-		return errors.New("logmiddle not exist")
+		fmt.Printf("logger adapter not found: %s", config.GlobalCfg.Logger.LogType)
+		return nil
 	}
-	DefaultLogger(NewLog, config.GlobalCfg.Logger.Level)
-	*Log = NewLog
-	return nil
+
+	DefaultLogger(logger, config.GlobalCfg.Logger.Level)
+
+	return logger
 }
+
+//func InitLogger(Log **logrus.Logger) error {
+//	NewLog, ok := adapters[config.GlobalCfg.Logger.LogType]
+//	if !ok {
+//		return errors.New("logmiddle not exist")
+//	}
+//	DefaultLogger(NewLog, config.GlobalCfg.Logger.Level)
+//	*Log = NewLog
+//	return nil
+//}

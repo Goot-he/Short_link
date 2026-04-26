@@ -24,15 +24,15 @@ func Logger() gin.HandlerFunc {
 		if err != nil {
 			hostName = "unknown"
 		}
-		statusCode := c.Writer.Status()
-		clientIp := c.ClientIP()
-		userAgent := c.Request.UserAgent()
-		dataSize := c.Writer.Size()
+		statusCode := c.Writer.Status()    //响应状态码
+		clientIp := c.ClientIP()           //用户IP
+		userAgent := c.Request.UserAgent() //判断设备（手机、电脑）
+		dataSize := c.Writer.Size()        //响应数据大小
 		if dataSize < 0 {
 			dataSize = 0
 		}
-		method := c.Request.Method
-		path := c.Request.RequestURI
+		method := c.Request.Method   //http请求方法
+		path := c.Request.RequestURI //完整的请求路径
 
 		// 添加字段到这个entry里面
 		entry := global.Log.WithFields(logrus.Fields{
@@ -58,3 +58,5 @@ func Logger() gin.HandlerFunc {
 		}
 	}
 }
+
+// log 日志中间件 在程序开始前初始化一个log全局对象 然后在中间件里面直接使用这个全局日志实例对象

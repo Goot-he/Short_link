@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+// 原始版本 1位符号位 + 41位时间戳 + 10位机械ID + 12位序列号
+// 时钟序列版本 1位符号位 + 41位时间戳 + 7位机械ID + 3位时钟序列 + 12位序列号
+// 当发生时钟回拨的时候将时钟序列ID加1 当时间回到正常的时候时钟序列还是从0开始
+
 const (
 	// 部分长度
 	workerIDBits   = 7  // 机器ID位数
@@ -34,6 +38,7 @@ type SnowflakeIDGenerator struct {
 	mu            sync.Mutex
 }
 
+// NewSnowflakeIDGenerator 雪花ID生成器
 func NewSnowflakeIDGenerator(workerID int64) (*SnowflakeIDGenerator, error) {
 	if workerID < 0 || workerID > maxWorkerID {
 		return nil, fmt.Errorf("workerID out of range")
@@ -46,6 +51,7 @@ func NewSnowflakeIDGenerator(workerID int64) (*SnowflakeIDGenerator, error) {
 	}, nil
 }
 
+// 获取当前时间戳
 func (s *SnowflakeIDGenerator) currentTimestamp() int64 {
 	return time.Now().UnixNano()/int64(time.Millisecond) - epoch
 }
@@ -58,7 +64,7 @@ func (s *SnowflakeIDGenerator) waitForNextMillis(lastTimestamp int64) int64 {
 	return timestamp
 }
 
-// 生成ID
+// GenerateID 生成ID
 func (s *SnowflakeIDGenerator) GenerateID() int64 {
 	s.mu.Lock()
 	defer s.mu.Unlock()

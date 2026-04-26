@@ -39,28 +39,28 @@ func (c *Cache) FindShortUrl(ctx context.Context, req model.FindUrlRequest) (*mo
 	//var response *model.FindUrlResponse
 	response := &model.FindUrlResponse{}
 	var err error
-	
+
 	// 1. 获取长链接
 	response.LongUrl, err = c.rdb.Get(ctx, req.ShortUrl).Result()
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// 2. 获取剩余过期时间 (TTL)
 	ttl, err := c.rdb.TTL(ctx, req.ShortUrl).Result()
 	if err != nil {
 		// 如果获取 TTL 失败，可以忽略或记录日志，但不应影响返回长链接
 		// 这里选择默认返回零值时间
-		response.ExpiredAt = time.Time{} 
+		response.ExpiredAt = time.Time{}
 	} else {
 		if ttl > 0 {
 			response.ExpiredAt = time.Now().Add(ttl)
 		} else {
 			// -1 (永不过期) 或 -2 (已过期)
-			response.ExpiredAt = time.Time{} 
+			response.ExpiredAt = time.Time{}
 		}
 	}
-	
+
 	return response, nil
 }
 
@@ -69,9 +69,6 @@ func InitBloomFilter(ctx context.Context) {
 	n := config.GlobalCfg.Bloom.N
 	// 预初始的错误率
 	p := config.GlobalCfg.Bloom.P
-
-	println("n = ", n)
-	println("p = ", p, "\n")
 
 	BF = bloom.NewWithEstimates(uint(n), p) //初始化全局的布隆过滤器
 
